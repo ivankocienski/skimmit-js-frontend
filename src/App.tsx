@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 
 import postData from './PostResponse';
 import PostCard from './PostCard';
 
 function App() {
-  let [postList, setPostList] = useState(postData["posts"].filter( post => !post.has_read ));
+  // let [postList, setPostList] = useState(postData["posts"].filter( post => !post.has_read ));
+  let [postList, dispatch] = useReducer(postReducer, postData["posts"]);
 
   let markPostAsRead = (postRedditId: string) => {
-    return function() {
-      console.log("markPostAsRead: postRedditId=", postRedditId);
-      setPostList(postList.filter( post => (post.reddit_id != postRedditId)));
+    return function(e) {
+      e.preventDefault();
+
+      //console.log("markPostAsRead: postRedditId=", postRedditId);
+      // setPostList(postList.filter( post => (post.reddit_id != postRedditId)));
+      dispatch({
+        type: 'hidePost',
+        redditId: postRedditId
+      })
     }
   };
 
@@ -30,3 +37,17 @@ function App() {
 }
 
 export default App
+
+function postReducer(postList, action) {
+  switch(action.type) {
+    case 'hidePost': {
+      const postRedditId = action.redditId;
+      console.log("dispatch.hidePost: postRedditId=", postRedditId);
+      return postList.filter( post => (post.reddit_id != postRedditId));
+    }
+
+    default: {
+      throw Error('Unknown action: ' + action.type);
+    }
+  }
+}
